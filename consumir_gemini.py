@@ -50,7 +50,7 @@ def extraer_texto(datos): # Gemini
         raise RuntimeError("La respuesta no recibe el texto generado en el lugar definido.")
 
 def obtener_dato_de_prueba(pregunta):
-    url, body = armar_peticion(pregunta) # obtiene url y body
+    url, body = armar_peticion(pregunta) # obtiene url y body"
     # url = resultado de armar_peticion
     # body = resultado de armar_peticion
     datos = enviar_peticion(url, body)

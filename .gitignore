@@ -5,11 +5,13 @@ env/
 
 # Variables de entorno (secretos, nunca se sube)
 .env
+curl.txt
 
 # Cachés y compilados de Python
 __pycache__/
 *.py[cod]
 *.egg-info/
+*.pyc
 
 # Archivos del sistema operativo y del editor
 .DS_Store

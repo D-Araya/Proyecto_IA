@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Constantes
-MODELO = "gemini-flash-latest"
+MODELO = "gemini-3.6-flash"
 URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models/"
 API_KEY = os.getenv("GEMINI_API_KEY")
 
@@ -49,12 +49,41 @@ def extraer_texto(datos): # Gemini
     except (KeyError, IndexError):
         raise RuntimeError("La respuesta no recibe el texto generado en el lugar definido.")
 
-def obtener_dato_de_prueba(pregunta):
-    url, body = armar_peticion(pregunta) # obtiene url y body"
-    # url = resultado de armar_peticion
-    # body = resultado de armar_peticion
-    datos = enviar_peticion(url, body)
-    return extraer_texto(datos)
+# funcion de orquestacion
+def obtener_dato_de_prueba(pregunta):  # pregunta = "Confirma la conexion"
+  url, body = armar_peticion(pregunta)  # obtiene url y body
+  # url = resultado de armar_peticion
+  # body = resultado de armar_peticion
+  datos = enviar_peticion(url, body)
+  costo = calcular_costo(datos, 0.00000075, 0.00000375)  # obtener precio_entrada, precio_salida: https://ai.google.dev/gemini-api/docs/pricing?hl=es-419#gemini-3.6-flash
+  print(f"Costo de la petición: ${costo:.6f} USD")
+  return extraer_texto(datos)
+
+# def calcular_costo(datos: dict, precio_entrada: float, precio_salida: float) -> float:
+def calcular_costo(datos, precio_entrada, precio_salida):
+  # datos = {dict..., "usageMetadata"}
+  uso = datos["usageMetadata"]
+
+  # uso = {
+  #     "promptTokenCount": 10,
+  #     "candidatesTokenCount": 471,
+  #     "totalTokenCount": 1377,
+  #     "promptTokensDetails": [
+  #         {
+  #             "modality": "TEXT",
+  #             "tokenCount": 10,
+  #         }
+  #     ],
+  #     "thoughtsTokenCount": 896,
+  #     "serviceTier": "standard"
+  # }
+
+  tokens_entrada = uso["promptTokenCount"]
+  tokens_salida = uso["candidatesTokenCount"] # revisar si existe o no, si no existe colocarlo como 0
+  tokens_razonamiento = uso["thoughtsTokenCount"]
+
+  costo = (tokens_entrada * precio_entrada) + ((tokens_salida + tokens_razonamiento) * precio_salida)
+  return costo
 
 try:
     print(obtener_dato_de_prueba("Confirma en una frase corta que esta conexión funciona"))

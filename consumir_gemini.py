@@ -1,5 +1,6 @@
 import os
 import requests
+import time
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -10,19 +11,20 @@ URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models/"
 API_KEY = os.getenv("GEMINI_API_KEY")
 
 # Función para crear la solicitud
-def armar_peticion(pregunta):
+def armar_peticion(pregunta, system_instruction):
     if not pregunta:
         raise ValueError("La pregunta no puede estar vacía")
     
     url = f"{URL_BASE}{MODELO}:generateContent?key={API_KEY}"
     
     body = {
-        "contents": [
-            {
-                "parts": [{"text": pregunta}]
-            }
-        ]
-    }    
+        "systemInstruction": {
+            "parts": [{"text": system_instruction}]
+        },
+        "contents": {
+            [{"parts": [{"text": pregunta}]}]
+        }
+    }
     return url, body
 
 # Función envía la petición
@@ -51,41 +53,62 @@ def extraer_texto(datos): # Gemini
 
 # funcion de orquestacion
 def obtener_dato_de_prueba(pregunta):  # pregunta = "Confirma la conexion"
-  url, body = armar_peticion(pregunta)  # obtiene url y body
-  # url = resultado de armar_peticion
-  # body = resultado de armar_peticion
-  datos = enviar_peticion(url, body)
-  costo = calcular_costo(datos, 0.00000075, 0.00000375)  # obtener precio_entrada, precio_salida: https://ai.google.dev/gemini-api/docs/pricing?hl=es-419#gemini-3.6-flash
-  print(f"Costo de la petición: ${costo:.6f} USD")
-  return extraer_texto(datos)
+    system_instruction = "Eres un asistente amigable y respondes en máximo 2 palabras."
+    url, body = armar_peticion(pregunta, system_instruction)  # obtiene url y body
+
+    inicio = time.perf_counter() # inicio contador
+
+    # url = resultado de armar_peticion
+    # body = resultado de armar_peticion
+    datos = enviar_peticion(url, body)
+
+    fin = time.perf_counter()  # termino contador
+    latencia = fin - inicio
+    print(f"Latencia: {latencia:.2f} segundos")
+
+    costo = calcular_costo(datos, 0.00000075, 0.00000375)  # obtener precio_entrada, precio_salida: https://ai.google.dev/gemini-api/docs/pricing?hl=es-419#gemini-3.6-flash
+    print(f"Costo de la petición: ${costo:.6f} USD")
+    return extraer_texto(datos)
 
 # def calcular_costo(datos: dict, precio_entrada: float, precio_salida: float) -> float:
 def calcular_costo(datos, precio_entrada, precio_salida):
-  # datos = {dict..., "usageMetadata"}
-  uso = datos["usageMetadata"]
+    # datos = {dict..., "usageMetadata"}
+    uso = datos["usageMetadata"]
 
-  # uso = {
-  #     "promptTokenCount": 10,
-  #     "candidatesTokenCount": 471,
-  #     "totalTokenCount": 1377,
-  #     "promptTokensDetails": [
-  #         {
-  #             "modality": "TEXT",
-  #             "tokenCount": 10,
-  #         }
-  #     ],
-  #     "thoughtsTokenCount": 896,
-  #     "serviceTier": "standard"
-  # }
+    # uso = {
+    #     "promptTokenCount": 10,
+    #     "candidatesTokenCount": 471,
+    #     "totalTokenCount": 1377,
+    #     "promptTokensDetails": [
+    #         {
+    #             "modality": "TEXT",
+    #             "tokenCount": 10,
+    #         }
+    #     ],
+    #     "thoughtsTokenCount": 896,
+    #     "serviceTier": "standard"
+    # }
 
-  tokens_entrada = uso["promptTokenCount"]
-  tokens_salida = uso["candidatesTokenCount"] # revisar si existe o no, si no existe colocarlo como 0
-  tokens_razonamiento = uso["thoughtsTokenCount"]
+    tokens_entrada = uso["promptTokenCount"]
+    tokens_salida = uso["candidatesTokenCount"] # revisar si existe o no, si no existe colocarlo como 0
+    tokens_razonamiento = uso["thoughtsTokenCount"]
 
-  costo = (tokens_entrada * precio_entrada) + ((tokens_salida + tokens_razonamiento) * precio_salida)
-  return costo
+    costo = (tokens_entrada * precio_entrada) + ((tokens_salida + tokens_razonamiento) * precio_salida)
+    return costo
 
 try:
     print(obtener_dato_de_prueba("Confirma en una frase corta que esta conexión funciona"))
 except (ValueError, RuntimeError) as error:
     print("No se pudo completar la operación: ", error)
+
+
+"""
+Ejecute 4 veces la MISMA petición con 1 modelo
+y ante cada petición se calcule e imprima: Latencia, Costo, Respuesta
+
+Vuelvo a hacer lo mismo con un modelo distinto (3 modelos a comparar)
+
+OBJETIVO: Elijas el mejor modelo para tu proyecto
+
+Prompt utilizado sea algo relacionado con tu proyecto.
+"""

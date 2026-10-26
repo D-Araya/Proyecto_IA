@@ -19,9 +19,7 @@ Se compararon tres modelos para responder una solicitud administrativa de cotiza
 
 ## Diagrama de arquitectura
 
-**Pendiente de generar.** Se añadirá el diagrama cuando esté listo.
-
-[Diagrama de Arquitectura](docs/diagrama_arquitectura.png)
+![Diagrama de Arquitectura](diagrama.png)
 
 ## Comparación de candidatos
 

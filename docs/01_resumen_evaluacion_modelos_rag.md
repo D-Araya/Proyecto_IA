@@ -1,7 +1,8 @@
 # Evaluación comparativa de modelos Gemini para cotizaciones con RAG
 
-> **Documento relacionado:** [Comparación de modelos Gemini: resultados completos](comparacion_modelos_markdown.md)  
-> Este informe sintetiza las tres ejecuciones registradas en el documento vinculado y evalúa los modelos para el caso de uso descrito.
+> **Documentos relacionados, para mas profundidad:** [Evaluación comparativa de modelos Gemini para cotizaciones con RAG](01_resumen_evaluacion_modelos_rag.md) y [Comparación de modelos Gemini: resultados completos](comparacion_modelos_markdown.md).
+
+> Este informe sintetiza las tres ejecuciones registradas en el documento vinculado y evalúa los modelos para el caso de uso descrito. Para realizar la evaluación me he basado en  los resultados obtenidos en las pruebas realizadas.  con el codigo de [comparar_modelos.py](../src/comparar_modelos.py)
 
 ## 1. Objetivo y criterio de evaluación
 
@@ -133,3 +134,5 @@ Los errores HTTP 503 y los tiempos de espera deben tratarse como problemas obser
 Para una función de cotizaciones basada en RAG, **Gemini 3.1 Flash Lite es la recomendación inicial por eficiencia económica y rapidez**, siempre que se acompañe de reintentos y validaciones de negocio deterministas. Gemini 3.6 Flash es una alternativa equilibrada cuando se valora una respuesta algo más elaborada. Gemini 3.8 Flash puede ser útil cuando el detalle adicional justifique una mayor latencia.
 
 Esta conclusión se limita a las tres ejecuciones documentadas y al tipo de pregunta evaluada; no constituye una garantía de rendimiento para otros conjuntos de consultas o condiciones de servicio.
+
+

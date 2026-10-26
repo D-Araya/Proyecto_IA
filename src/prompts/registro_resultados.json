@@ -1,0 +1,14 @@
+{
+  "generar_cotizacion": {
+    "exitos": 3,
+    "intentos": 3
+  },
+  "calcular_descuento": {
+    "exitos": 3,
+    "intentos": 3
+  },
+  "validar_cotizacion": {
+    "exitos": 3,
+    "intentos": 3
+  }
+}

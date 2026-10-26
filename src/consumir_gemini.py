@@ -3,12 +3,13 @@ import requests
 import time
 import re
 import json
+
 from dotenv import load_dotenv
 
 load_dotenv()
 
 # Constantes
-MODELO = "gemini-3.6-flash"
+MODELO = "gemini-3.1-flash-lite"
 URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models/"
 API_KEY = os.getenv("GEMINI_API_KEY")
 
@@ -46,6 +47,16 @@ def enviar_peticion(url, body):
         raise RuntimeError("No se pudo conectar con el servicio. Intenta de nuevo en unos momentos.")
     except requests.exceptions.Timeout:
         raise RuntimeError("Se agotó el tiempo. Intenta de nuevo en unos momentos.")
+    
+    if respuesta.status_code in (401, 403):
+        raise ValueError("Credencial inválida o sin permiso. Revisa tu GEMINI_API_KEY")
+    
+    if respuesta.status_code >= 500:
+        raise TimeoutError("El proveedor no pudo procesar la petición. Hay que esperar y reintentar")
+
+    if respuesta.status_code == 429:
+        raise TimeoutError("Límite excedido. Vuelva a intentarlo más tarde")
+
     
     if respuesta.status_code != 200:
         raise RuntimeError(f"Error en la petición. Status Code: {respuesta.status_code}")
@@ -143,20 +154,10 @@ def parsear_respuesta_json(texto, claves_requeridas=None):
             raise ValueError("La respuesta no tiene la estructura esperada.")
     return datos
 
+if __name__ == "__main__": # Solamente ejecútalo si el archivo en el que estoy está siendo directamente ejecutado. NO LO EJECUTA EN IMPORTS
+    try:
+        print(obtener_dato_de_prueba("Confirma en una frase corta que esta conexión funciona"))
+    except (ValueError, RuntimeError, TimeoutError) as error:
+        print("No se pudo completar la operación: ", error)
 
-try:
-    print(obtener_dato_de_prueba("Confirma en una frase corta que esta conexión funciona"))
-except (ValueError, RuntimeError) as error:
-    print("No se pudo completar la operación: ", error)
 
-
-"""
-Ejecute 4 veces la MISMA petición con 1 modelo
-y ante cada petición se calcule e imprima: Latencia, Costo, Respuesta
-
-Vuelvo a hacer lo mismo con un modelo distinto (3 modelos a comparar)
-
-OBJETIVO: Elijas el mejor modelo para tu proyecto
-
-Prompt utilizado sea algo relacionado con tu proyecto.
-"""

@@ -9,9 +9,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Constantes
-MODELO = "gemini-3.1-flash-lite"
+# os.getenv toma la variable del .env y, si no la encuentra, usa el valor por defecto:
+MODELO = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite")
 URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models/"
-API_KEY = os.getenv("GEMINI_API_KEY")
+API_KEY = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
 
 # Función para crear la solicitud
 def armar_peticion(pregunta, system_instruction, response_schema=None):
@@ -19,17 +20,21 @@ def armar_peticion(pregunta, system_instruction, response_schema=None):
         raise ValueError("La pregunta no puede estar vacía")
     
     url = f"{URL_BASE}{MODELO}:generateContent?key={API_KEY}"
-    
+    #crear el body únicamente con lo que siempre es obligatorio (contents), 
+    # y agregar systemInstruction solo si realmente hay una instrucción que darle
     body = {
-        "systemInstruction": {
-            "parts": [{"text": system_instruction}]
-        },
         "contents": [
             {
                 "parts": [{"text": pregunta}]
             }
         ]
     }
+
+    # Solo se agrega si hay texto real:
+    if system_instruction and system_instruction.strip():
+        body["systemInstruction"] = {
+            "parts": [{"text": system_instruction}]
+        }
     
     if response_schema is not None:
         body["generationConfig"] = {
@@ -59,7 +64,7 @@ def enviar_peticion(url, body):
 
     
     if respuesta.status_code != 200:
-        raise RuntimeError(f"Error en la petición. Status Code: {respuesta.status_code}")
+        raise RuntimeError(f"Error en la petición. Status Code: {respuesta.status_code} - {respuesta.text}")
     
     try:
         return respuesta.json()

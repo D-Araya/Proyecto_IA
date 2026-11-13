@@ -11,7 +11,7 @@ load_dotenv()
 # ============================================================
 
 URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models/"
-API_KEY = os.getenv("GEMINI_API_KEY")
+API_KEY = os.getenv("GOOGLE_API_KEY")
 REPETICIONES = 4
 
 # Precios en USD por token, correspondientes al nivel estándar

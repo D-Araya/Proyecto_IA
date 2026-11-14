@@ -63,6 +63,7 @@ def con_reintento(
 # Por eso es obligatorio separarlos en lugar de usar un único total global.
 COSTO_ENTRADA_POR_MILLON = 0.25  # $0.25 USD por cada 1,000,000 tokens de entrada
 COSTO_SALIDA_POR_MILLON = 1.50   # $1.50 USD por cada 1,000,000 tokens de salida
+COSTO_POR_1000_TOKENS = 0.00015  # Tarifa base referencial por cada 1,000 tokens
 
 # Variable global para llevar el acumulado de la sesión actual
 costo_total_sesion = 0.0
@@ -80,16 +81,17 @@ def registrar_costo(respuesta: dict) -> float:
     # 1. Separamos los contadores (crucial porque tienen precios distintos)
     tokens_entrada = uso.get("promptTokenCount", 0)     # Lo que tú le envías al modelo
     tokens_salida = uso.get("candidatesTokenCount", 0)  # Lo que el modelo te responde
-    total_tokens = uso.get("totalTokenCount", 0)        # La suma de ambos (solo informativo)
+    total_tokens = uso.get("totalTokenCount", 0)        # La suma de ambos (o total reportado)
     
-    # 2. Cálculo diferenciado por tipo de token
-    # No podemos usar un solo 'total_tokens' con una tarifa plana porque la salida 
-    # (generación) es significativamente más cara que la entrada (procesamiento).
-    costo_entrada = (tokens_entrada / 1_000_000) * COSTO_ENTRADA_POR_MILLON
-    costo_salida = (tokens_salida / 1_000_000) * COSTO_SALIDA_POR_MILLON
-    
-    # El costo total de esta operación específica es la suma de ambos
-    costo_estimado = costo_entrada + costo_salida
+    # 2. Cálculo de costo:
+    # Si la respuesta incluye el desglose de entrada y salida, usamos tarifas diferenciadas.
+    # Si solo incluye totalTokenCount (como en respuestas estándar o pruebas), usamos la tarifa por cada 1,000 tokens.
+    if tokens_entrada > 0 or tokens_salida > 0:
+        costo_entrada = (tokens_entrada / 1_000_000) * COSTO_ENTRADA_POR_MILLON
+        costo_salida = (tokens_salida / 1_000_000) * COSTO_SALIDA_POR_MILLON
+        costo_estimado = costo_entrada + costo_salida
+    else:
+        costo_estimado = (total_tokens / 1000) * COSTO_POR_1000_TOKENS
     
     # 3. Acumulamos en la sesión global
     costo_total_sesion += costo_estimado
@@ -141,6 +143,7 @@ def consultar_modelo(pregunta: str, system_instruction: str = "") -> str:
 # '__name__ == "__main__"' asegura que este bloque SOLO se ejecute si corres 'py .\cliente.py' directamente.
 # Si otro archivo importa 'consultar_modelo' desde este archivo, este código de prueba no se ejecutará.
 if __name__ == "__main__":
+    """  
     # Realizamos una consulta de prueba pasando la pregunta y definiendo un rol de sistema
     resultado = consultar_modelo(
         pregunta="¿Cuál es la capital de Chile?", 
@@ -148,5 +151,13 @@ if __name__ == "__main__":
     )
     # Mostramos en consola la respuesta generada por el modelo
     print(resultado)
-    print(f"Costo acumulado de la sesión: ${costo_total_sesion:.5f}")
 
+"""    
+    for i in range(10):
+        try:
+            respuesta = consultar_modelo(f"Pregunta de prueba número {i}")
+            print(f"Respuesta {i} : {respuesta[:40]}...")
+        except RuntimeError as error:
+            print(f"Respuesta {i} falló definitivamente: {error}")
+    
+    print(f"Costo total del ensayo: ${costo_total_sesion:.5f}")

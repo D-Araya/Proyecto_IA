@@ -150,8 +150,3 @@ if __name__ == "__main__":
     print(resultado)
     print(f"Costo acumulado de la sesión: ${costo_total_sesion:.5f}")
 
-"""
-https://github.com/SebaPobando/Proyecto-IA-Ayudantias
-"""
-
-

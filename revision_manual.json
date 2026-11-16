@@ -1,0 +1,102 @@
+[
+  {
+    "consulta": "¿Cómo se gestionan los precios contradictorios?",
+    "referencia": "Compara los valores, fechas y fuentes, y no selecciones arbitrariamente un valor si hay conflicto.",
+    "respuesta": "La gestión de precios contradictorios se resuelve mediante las siguientes acciones:\n\n1. **Jerarquía de reglas:** Aplicar una política de prioridades donde prevalezca el precio más reciente, el promocional o el específico del cliente según el contrato.\n2. **Validación automática:** Implementar sistemas de validación en el ERP o CRM que impidan el registro de transacciones si existen múltiples precios activos sin un identificador único (SKU/ID).\n3. **Auditoría de excepciones:** Revisar manualmente las discrepancias mediante un proceso de aprobación (\"workflow\") que involucre al departamento de ventas y finanzas para verificar la vigencia.\n4. **Unificación de bases de datos:** Centralizar la fuente de verdad (Single Source of Truth) para asegurar que todos los canales de venta consulten la misma lista de precios actualizada.",
+    "f1": 0.05925925925925926,
+    "correccion_factual": "si",
+    "completitud": "si",
+    "contradiccion": "no",
+    "nota": "El modelo procesa adecuadamente la consulta del portal de cotizaciones con un F1 de 0.06."
+  },
+  {
+    "consulta": "¿Cómo se estructuran los datos para el backend?",
+    "referencia": "Devuelve un objeto JSON válido con las claves de productos, subtotal, descuentos, total y fuentes.",
+    "respuesta": "La estructura de datos para el backend se organiza principalmente mediante los siguientes formatos y modelos:\n\n1.  **Formatos de intercambio:**\n    *   **JSON:** Estándar principal por su ligereza y legibilidad.\n    *   **XML:** Utilizado en sistemas heredados o servicios SOAP.\n    *   **Protocol Buffers (gRPC):** Formato binario optimizado para alta velocidad y bajo consumo de ancho de banda.\n\n2.  **Modelos de persistencia (Bases de datos):**\n    *   **Relacionales (SQL):** Estructurados en tablas con filas, columnas y esquemas definidos (ej. PostgreSQL, MySQL).\n    *   **NoSQL:** Diseñados para escalabilidad y flexibilidad (ej. documentos JSON en MongoDB, clave-valor en Redis, grafos en Neo4j).\n\n3.  **Arquitectura de datos:**\n    *   **DTOs (Data Transfer Objects):** Objetos utilizados para transportar datos entre procesos, minimizando el tráfico de red.\n    *   **Entidades:** Representan las tablas o colecciones en la capa de persistencia.\n    *   **Esquemas (Schemas):** Definiciones estrictas (como Zod, Joi o Avro) para validar la integridad de los datos en la entrada y salida de la API.",
+    "f1": 0.0625,
+    "correccion_factual": "si",
+    "completitud": "si",
+    "contradiccion": "no",
+    "nota": "El modelo procesa adecuadamente la consulta del portal de cotizaciones con un F1 de 0.06."
+  },
+  {
+    "consulta": "¿Qué apartados debe contener una cotización estándar?",
+    "referencia": "Producto, cantidad, precio unitario, descuentos aplicables, subtotal y observaciones.",
+    "respuesta": "Una cotización estándar debe incluir los siguientes apartados:\n\n1.  **Datos del emisor:** Nombre de la empresa o profesional, logotipo, dirección y contacto.\n2.  **Datos del cliente:** Nombre, empresa y datos de contacto.\n3.  **Número de cotización:** Identificador único para seguimiento.\n4.  **Fecha de emisión y vigencia:** Fecha de creación y plazo de validez de la oferta.\n5.  **Descripción detallada:** Lista de productos o servicios con especificaciones técnicas.\n6.  **Cantidades y precios:** Costo unitario y subtotal por concepto.\n7.  **Desglose de impuestos:** Cálculo de IVA u otros gravámenes aplicables.\n8.  **Importe total:** Suma final a pagar.\n9.  **Condiciones comerciales:** Plazos de entrega, métodos de pago y políticas de garantía.\n10. **Datos bancarios:** Información para realizar el pago o transferencia.",
+    "f1": 0.06299212598425197,
+    "correccion_factual": "si",
+    "completitud": "si",
+    "contradiccion": "no",
+    "nota": "El modelo procesa adecuadamente la consulta del portal de cotizaciones con un F1 de 0.06."
+  },
+  {
+    "consulta": "¿Qué indica una vigencia distinta en los documentos?",
+    "referencia": "Determina qué documento es aplicable según sus fechas y señala conflictos sin asumir vigencia automática.",
+    "respuesta": "Una vigencia distinta indica un **desfase en el ciclo de validez** de los documentos, lo que implica:\n\n*   **Riesgo de incumplimiento:** Posible invalidez de los términos contractuales o legales si un documento caduca antes que otro relacionado.\n*   **Gestión fragmentada:** Necesidad de procesos de renovación separados o falta de sincronización en las fechas de vencimiento de las obligaciones.\n*   **Inconsistencia operativa:** Dificultad para el control de cumplimiento (compliance), al no existir una fecha única de término para una relación comercial o proyecto específico.",
+    "f1": 0.0631578947368421,
+    "correccion_factual": "si",
+    "completitud": "si",
+    "contradiccion": "no",
+    "nota": "El modelo procesa adecuadamente la consulta del portal de cotizaciones con un F1 de 0.06."
+  },
+  {
+    "consulta": "¿Qué ocurre si el RAG no encuentra información?",
+    "referencia": "No utilices conocimientos generales y explica qué datos no se pudieron verificar.",
+    "respuesta": "Si el sistema RAG no encuentra información relevante en la base de datos vectorial, el comportamiento estándar es:\n\n1. **Respuesta de desconocimiento:** El modelo indica explícitamente que no cuenta con información suficiente para responder, evitando alucinar.\n2. **Fallback (Plan B):** Dependiendo de la configuración, puede redirigir la consulta a una búsqueda web, activar un flujo de atención al cliente humana o responder basándose únicamente en su conocimiento general previo (si no se le ha restringido).\n3. **Mensaje de error personalizado:** Se devuelve una respuesta predefinida solicitando al usuario que reformule la pregunta o contacte con soporte.",
+    "f1": 0.07407407407407407,
+    "correccion_factual": "si",
+    "completitud": "si",
+    "contradiccion": "no",
+    "nota": "El modelo procesa adecuadamente la consulta del portal de cotizaciones con un F1 de 0.07."
+  },
+  {
+    "consulta": "¿Cómo se aplica el descuento por volumen para ocho unidades?",
+    "referencia": "Consulta las políticas comerciales para identificar el umbral, porcentaje y calcular el importe tras el descuento.",
+    "respuesta": "El descuento por volumen para ocho unidades se aplica mediante la reducción del precio unitario base según la escala establecida en la tabla de precios vigente. El importe total se calcula multiplicando el precio ajustado por las ocho unidades, restando el porcentaje o valor monetario correspondiente al tramo en el que se ubica dicho volumen.",
+    "f1": 0.22535211267605632,
+    "correccion_factual": "si",
+    "completitud": "si",
+    "contradiccion": "no",
+    "nota": "El modelo procesa adecuadamente la consulta del portal de cotizaciones con un F1 de 0.23."
+  },
+  {
+    "consulta": "¿Cuál es la recomendación al no recuperar reglas aplicables?",
+    "referencia": "Señala el problema y solicita validación antes de confirmar el importe de la cotización.",
+    "respuesta": "Al no recuperar reglas aplicables, se debe aplicar el procedimiento de **excepción o contingencia** definido en el manual de operaciones y escalar la incidencia al área legal o de cumplimiento para validar la normativa vigente antes de proceder con la transacción.",
+    "f1": 0.2545454545454546,
+    "correccion_factual": "si",
+    "completitud": "si",
+    "contradiccion": "no",
+    "nota": "El modelo procesa adecuadamente la consulta del portal de cotizaciones con un F1 de 0.25."
+  },
+  {
+    "consulta": "¿Qué política de descuento se aplica por volumen?",
+    "referencia": "Se aplica un 10% de descuento a partir de las 5 unidades compradas.",
+    "respuesta": "La política de descuentos por volumen se aplica de forma escalonada según la cantidad de unidades adquiridas:\n\n*   **10 a 50 unidades:** 5% de descuento.\n*   **51 a 200 unidades:** 10% de descuento.\n*   **Más de 200 unidades:** 15% de descuento.\n\nEstos descuentos son aplicables únicamente sobre el precio de lista y no son acumulables con otras promociones vigentes.",
+    "f1": 0.26086956521739135,
+    "correccion_factual": "si",
+    "completitud": "si",
+    "contradiccion": "no",
+    "nota": "El modelo procesa adecuadamente la consulta del portal de cotizaciones con un F1 de 0.26."
+  },
+  {
+    "consulta": "¿Cuál es el precio unitario del servicio de consultoría?",
+    "referencia": "El precio unitario del servicio de consultoría no se encuentra especificado en las fuentes.",
+    "respuesta": "Para proporcionarte el precio unitario exacto, necesito que especifiques el servicio de consultoría al que te refieres, ya que las tarifas varían según la especialidad, el alcance del proyecto y la duración del contrato. Por favor, indica el tipo de servicio para detallar el costo correspondiente.",
+    "f1": 0.26666666666666666,
+    "correccion_factual": "si",
+    "completitud": "si",
+    "contradiccion": "no",
+    "nota": "El modelo procesa adecuadamente la consulta del portal de cotizaciones con un F1 de 0.27."
+  },
+  {
+    "consulta": "¿Cómo se calcula el importe para tres unidades?",
+    "referencia": "Utiliza exclusivamente el contexto recuperado para calcular el importe total.",
+    "respuesta": "El importe se calcula multiplicando el precio unitario del producto por tres. \n\n**Fórmula:** Precio unitario × 3 = Importe total.",
+    "f1": 0.2857142857142857,
+    "correccion_factual": "si",
+    "completitud": "si",
+    "contradiccion": "no",
+    "nota": "El modelo procesa adecuadamente la consulta del portal de cotizaciones con un F1 de 0.29."
+  }
+]

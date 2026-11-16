@@ -1,0 +1,83 @@
+[
+  {
+    "id": 1,
+    "consulta": "¿Qué es Python?",
+    "referencia": "Python es un lenguaje de programación interpretado.",
+    "respuesta": "Python es un lenguaje de programación de alto nivel, versátil, interpretado y de código abierto.",
+    "precision": 0.4666666666666667,
+    "cobertura": 1.0,
+    "f1": 0.6363636363636364
+  },
+  {
+    "id": 2,
+    "consulta": "¿En qué año fue la primera publicación de Python?",
+    "referencia": "La primera publicación de Python fue en 1991.",
+    "respuesta": "La primera versión de Python fue publicada oficialmente en el año 1991.",
+    "precision": 0.5833333333333334,
+    "cobertura": 0.875,
+    "f1": 0.7000000000000001
+  },
+  {
+    "id": 3,
+    "consulta": "¿Qué es una lista en Python?",
+    "referencia": "Una lista es una colección ordenada y modificable.",
+    "respuesta": "Es una estructura de datos mutable que permite almacenar colecciones ordenadas de elementos diversos.",
+    "precision": 0.14285714285714285,
+    "cobertura": 0.25,
+    "f1": 0.18181818181818182
+  },
+  {
+    "id": 4,
+    "consulta": "¿Qué devuelve len en Python?",
+    "referencia": "len devuelve la cantidad de elementos de un objeto.",
+    "respuesta": "La función len devuelve el número de elementos contenidos en un objeto de Python.",
+    "precision": 0.5714285714285714,
+    "cobertura": 0.8888888888888888,
+    "f1": 0.6956521739130435
+  },
+  {
+    "id": 5,
+    "consulta": "¿Para qué sirve print en Python?",
+    "referencia": "print muestra una representación de los objetos en la salida de texto.",
+    "respuesta": "La función print permite mostrar mensajes o datos por la salida estándar en pantalla.",
+    "precision": 0.2857142857142857,
+    "cobertura": 0.3333333333333333,
+    "f1": 0.30769230769230765
+  },
+  {
+    "id": 6,
+    "consulta": "¿Qué es un diccionario en Python?",
+    "referencia": "Un diccionario relaciona claves con valores.",
+    "respuesta": "Es una estructura de datos que almacena pares de claves y valores asociados.",
+    "precision": 0.15384615384615385,
+    "cobertura": 0.3333333333333333,
+    "f1": 0.21052631578947367
+  },
+  {
+    "id": 7,
+    "consulta": "¿Qué es una tupla en Python?",
+    "referencia": "Una tupla es una secuencia inmutable.",
+    "respuesta": "Es una colección ordenada e inmutable de elementos separados por comas entre paréntesis.",
+    "precision": 0.23076923076923078,
+    "cobertura": 0.5,
+    "f1": 0.3157894736842105
+  },
+  {
+    "id": 8,
+    "consulta": "¿Qué es un conjunto en Python?",
+    "referencia": "Un conjunto almacena elementos únicos.",
+    "respuesta": "Un conjunto en Python es una colección desordenada de elementos únicos y mutables.",
+    "precision": 0.3076923076923077,
+    "cobertura": 0.8,
+    "f1": 0.4444444444444444
+  },
+  {
+    "id": 9,
+    "consulta": "¿Para qué sirve def en Python?",
+    "referencia": "def define una función.",
+    "respuesta": "La palabra reservada def sirve para declarar y definir nuevas funciones en Python.",
+    "precision": 0.07692307692307693,
+    "cobertura": 0.25,
+    "f1": 0.11764705882352941
+  }
+]

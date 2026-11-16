@@ -134,7 +134,7 @@ casos = [
     ),
 ]
 
-raiz = Path(__file__).resolve().parents[1]
+raiz = Path(__file__).resolve().parent
 ruta_resultados = raiz / "resultados_metricas.json"
 
 # Recupera las respuestas guardadas en una ejecución anterior.

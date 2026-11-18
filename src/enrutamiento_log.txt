@@ -1,0 +1,209 @@
+Cynthia explicó el concepto de Fallback de la siguiente manera:
+
+¿Qué es un Fallback? Un Fallback es una cadena de respaldo que permite capturar errores del LLM sin romper el flujo del programa, dando una alternativa al usuario en lugar de mostrar el error directamente. 12
+
+Tipos de errores que puede capturar: 13
+
+Rate Limit Error (tokens agotados)
+Error 401 (sin autenticación)
+Error 400
+API Connection Error
+Respuestas vacías
+¿Cómo funciona?
+
+En lugar de usar un try/except, el Fallback captura el error directamente y conmuta de manera inmediata sin interrumpir el flujo del programa. 45
+Se usa el método with_fallbacks sobre la cadena original (cadena con enrutamiento), y se le pasa como parámetro una cadena de respaldo dentro de una lista. 67
+Respuesta genérica: Para implementarlo, Cynthia creó una respuesta genérica usando RunnableLambda, que es una función lambda ejecutable. 89 Esta respuesta genérica devuelve el mensaje: "Gracias por tu mensaje. Un miembro de nuestro equipo te va a responder pronto." 10
+
+Objetivo final: Si la cadena con enrutamiento falla en cualquier paso, en lugar de mostrar un error al usuario, el sistema muestra la respuesta genérica, haciendo que la experiencia sea transparente y sin interrupciones. 511
+
+---------------------
+
+
+Lo último que explicó Cynthia fue sobre la modularización del código y la creación de una función para procesar mensajes.
+
+¿Por qué modularizar?
+
+Cuando todo el código está en un solo script sin modularización, es difícil hacer testing. 1
+Para poder importar funciones o variables hacia un archivo de test, es necesario reorganizar el código. 1
+¿Qué se va a hacer?
+
+En lugar de tener la invocación directamente en el archivo de enrutamiento, Cynthia propuso crear una función especial llamada procesar_mensaje que se encargue de procesar el mensaje. 12
+Esta función recibirá 2 elementos: la cadena que se va a utilizar y algo más que estaba por definir. 3
+Condición de ejecución:
+
+Solo si se ejecuta directamente el archivo de enrutamiento, se llamará a esa función. 2
+Paso inmediato:
+
+Se van a migrar las 2 instrucciones que estaban sueltas (la respuesta genérica y la cadena robusta) dentro de esta nueva función procesar_mensaje. 23
+En resumen, el objetivo es organizar mejor el código para facilitar el testing y hacer el sistema más mantenible.
+
+
+-------------------
+
+
+Lo último que se explicó fue sobre el uso de if __name__ == "__main__" para controlar la ejecución del script.
+
+¿Por qué es necesario?
+
+Si la invocación de procesar_mensaje_seguro está directamente en el script, al importar el archivo de enrutamiento desde otro archivo, ese bloque también se ejecutaría automáticamente. 1
+Para evitar esto, se usa la condición if __name__ == "__main__". 12
+¿Cómo funciona?
+
+Este bloque garantiza que el código dentro de él solo se ejecute si el archivo se corre directamente, y no cuando es importado por otro módulo. 12
+Así, al hacer testing, se puede importar enrutamiento sin que se ejecute el script principal. 3
+Contexto práctico:
+
+En el archivo de test, se llamará directamente a la función procesar_mensaje_seguro para verificar que funcione correctamente. 3
+Esto también hace que la función sea reutilizable en cualquier otro archivo del proyecto. 4
+Los participantes recordaron que esto ya lo habían visto antes con el módulo consumir_gemini, donde ocurría el mismo problema de ejecución no deseada al importar.
+
+------------------------
+
+
+Lo último que explicó Cynthia fue sobre el registro de errores (log) y su importancia en las buenas prácticas de ingeniería de software.
+
+¿Por qué es importante el log?
+
+Óscar preguntó si, además de mostrar la respuesta genérica al usuario, quedaba en algún lugar un registro del error para revisión y solución posterior. 1
+Cynthia confirmó que sí, y que ese era precisamente uno de los objetivos del día. 2
+¿Qué se va a hacer?
+
+Dentro de la función procesar_mensaje_seguro, se dejaron marcados como pendientes 2 puntos donde se agregará el log: 3
+En el bloque except, cuando ocurre un error general de procesamiento. 3
+En la respuesta genérica del Fallback, cuando el LLM falla. 3
+Buenas prácticas:
+
+Cynthia enfatizó que registrar cualquier error o procesamiento erróneo es una buena práctica de ingeniería de software. 2
+El log está orientado al usuario final, mostrando mensajes amigables, mientras que internamente queda el registro técnico para revisión. 2
+En resumen, el sistema tendrá dos capas de protección: la respuesta genérica para el usuario y el log interno para el equipo técnico.
+
+
+
+-----------------------------------
+
+
+
+Lo último que explicó Cynthia fue sobre el sistema de logs y sus niveles, como respuesta a la pregunta de Claudio sobre cómo funciona el proceso completo. 1
+
+¿Cómo funciona el sistema completo?
+
+Al usuario le llega el mensaje genérico (por ejemplo, "Gracias por tu mensaje, un miembro de nuestro equipo te va a responder pronto") cuando ocurre un error. 2
+Por dentro, el sistema guarda el log del error para que el equipo técnico pueda revisarlo posteriormente. 1
+Niveles de log: 3
+
+Info: Confirmación de que todo está funcionando bien.
+Warning: Algo no está saliendo como debería, pero el programa todavía puede funcionar. 4
+Error: Un problema serio que puede romper el programa. 5
+Critical: Fallo total, el sistema no responde. 5
+¿Por qué se usa Warning en lugar de Info?
+
+Usar Info genera un log demasiado grande porque registra también los casos exitosos. 6
+Con Warning, solo se registran los eventos relevantes: warnings, errores y críticos, evitando que el archivo de log crezca innecesariamente. 7
+Objetivo final: El sistema tiene dos capas de protección: 8
+
+El usuario recibe una respuesta amigable sin ver el error técnico. 9
+El equipo técnico puede revisar el log para saber cuándo ocurrió el error, qué pasó y por qué. 
+
+
+------------------------------
+
+
+Explicación del Callback Handler
+El BaseCallbackHandler funciona como un listener (escucha) que monitorea diferentes eventos generados dentro de las cadenas de LangChain. 1
+
+Eventos que puede capturar:
+Cuando una cadena empieza o termina 2
+Cuando se inicia o completa una petición al LLM 2
+Cuando ocurre un error → evento on_chain_error 2
+¿Cómo funciona?
+Se crea una clase que hereda de BaseCallbackHandler, llamada "CapturaError" o similar. 2 Cuando ocurre un error en la cadena, en lugar de pasar directamente al fallback, el callback captura y registra el error primero en el error.log. 34
+
+Comportamiento importante:
+Si hay un error (por ejemplo, en la API Key), como el enrutamiento tiene varios pasos, el error se registra tantas veces como pasos tenga la cadena. 56 Esto permite ver exactamente qué tipo de error ocurrió (ej. error 401 de autenticación). 6
+
+Alternativa más sencilla: exception_key
+Sin necesidad de un callback completo, el fallback puede recibir un parámetro exception_key que envía un diccionario con el error correspondiente a la respuesta genérica. 7 Esto permite registrar el error específico de forma más simple. 8
+
+¿Cuándo usar cada uno?
+Callback Handler → cuando se necesitan más acciones ante un error (más flexible y potente). 8
+exception_key → cuando solo se necesita registrar el error (más sencillo). 8
+
+
+
+------------------------------
+
+
+
+
+Cómo funciona exception_key
+exception_key es una alternativa más sencilla al Callback Handler completo para capturar detalles específicos del error dentro de un fallback. 12
+
+Mecanismo principal:
+Cuando se activa el fallback, exception_key envía un diccionario que contiene el error específico a la función de respuesta genérica. 2
+Se especifica un nombre de clave (por ejemplo, "error") y la excepción real se adjunta automáticamente a ella. 2
+Dentro de tu función fallback (por ejemplo, fallback_con_log), puedes registrar ese error específico en tu error.log. 3
+Flujo de ejemplo:
+La cadena principal falla (ej. error de autenticación 401 en la API). 4
+En lugar de solo registrar un mensaje genérico "cadena principal falló", exception_key pasa el detalle real de la excepción. 4
+El logger registra el mensaje de error completo (ej. no autorizado, error 401). 4
+¿Cuándo usarlo?
+✅ Usa exception_key cuando solo necesitas registrar el error específico — requiere cambios mínimos en el código. 3
+⚙️ Usa el Callback Handler cuando necesitas acciones adicionales más allá del registro (más potente pero más complejo). 3
+Diferencia clave con el Callback Handler:
+Callback Handler	exception_key
+Momento	Captura el error antes del fallback 5	Pasa el error a través del fallback 2
+Complejidad	Mayor 6	Menor 3
+Ideal para	Múltiples acciones ante error 1	Solo registro del error 3
+
+
+---------------------------
+
+
+
+Conclusión de Cynthia
+Al cierre de la clase, Cynthia resumió que el enfoque del día fueron los errores y cómo sobrellevarlos, implementando tres elementos principales: 1
+
+Fallbacks (cadenas de respaldo): Si falla algún paso de la cadena principal, se activa una alternativa. 2 La respuesta genérica evolucionó desde un simple lambda que devolvía "gracias por tu mensaje" hasta una función que también registra el error en el log. 3
+
+Los errores cubiertos por el fallback son exclusivamente los relacionados con el LLM: rate limit, errores 401, 503, conexiones erróneas y respuestas vacías. 4
+Para el resto de errores genéricos de código, se mantiene el try/except. 4
+Logger (registro de errores): Permite guardar todos los errores para revisarlos y corregirlos posteriormente. 5
+
+Se configuró a partir del nivel warning (no desde info), capturando: warning, error y críticos. 6
+Se definió un formato con fecha, nivel, nombre del archivo y mensaje, y se estableció un archivo dedicado para almacenarlos. 7
+Actividad del día: Realizar un testing de la cadena completa con al menos 3 pruebas en un archivo test_orquestacion.py, enfocadas en el proyecto propio de cada participante. 
+
+
+pytest src/test_orquestacion.py -v
+
+Si te dicen «pero la tasa puede cambiar, entonces necesitas un agente», puedes responder que la tasa es un dato que la cadena consulta en cada evaluación. La cadena también puede tener condiciones. Si falta un ingreso, lo vuelve a pedir. Si no puede verificar la tasa, deriva el caso a revisión antes de emitir el veredicto.
+
+Para decirlo en el debate
+
+Yo elegiría una cadena porque la fintech ya sabe qué pasos seguir
+ y qué reglas aplicar. Consultar una tasa que cambia es parte del flujo. 
+ Con una cadena podemos registrar los ingresos usados, la fórmula y 
+ la versión de la tasa, y así explicar cómo se llegó a cada veredicto. 
+ Un agente aportaría más si tuviera que decidir qué investigar o qué 
+ acción tomar según lo que descubra.
+
+
+ Si te dicen «pero la tasa puede cambiar, entonces 
+ necesitas un agente», puedes responder que la tasa 
+ es un dato que la cadena consulta en cada evaluación. 
+ La cadena también puede tener condiciones. 
+ Si falta un ingreso, lo vuelve a pedir. 
+ Si no puede verificar la tasa, deriva el caso a 
+ revisión antes de emitir el veredicto.
+
+Para decirlo en el debate
+
+Yo elegiría una cadena porque la fintech ya sabe 
+qué pasos seguir y qué reglas aplicar. Consultar una 
+tasa que cambia es parte del flujo. Con una cadena 
+podemos registrar los ingresos usados, la fórmula y 
+la versión de la tasa, y así explicar cómo se llegó 
+a cada veredicto. Un agente aportaría más si tuviera 
+que decidir qué investigar o qué acción tomar según 
+lo que descubra.

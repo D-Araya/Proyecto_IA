@@ -33,6 +33,18 @@ El patrón AgentExecutor y create_tool_calling_agent importado desde
 langchain_classic.agents.
 El buffer MessagesPlaceholder("agent_scratchpad"), que actúa como la memoria 
 a corto plazo donde el agente anota el historial de razonamiento paso a paso.
+
+La pregunta evaluada en la Prueba 1 de nuestro agente ("¿Cuál es el precio del 
+producto SRV-001?") corresponde directamente al Prompt 5 (Consulta de condiciones 
+comerciales, precios y existencias) de tu banco de prompts.
+¿Por qué se asocia a ese prompt?
+Propósito comercial: El Prompt 5 está diseñado específicamente para que el modelo 
+responda con precisión sobre catálogos, vigencias y costos unitarios de artículos 
+tecnológicos (en este caso, el servidor rack).
+Activación de herramienta: En la arquitectura del agente, al recibir una consulta 
+orientada a conocer importes o existencias, el modelo activa de manera autónoma 
+la herramienta @tool especializada (consultar_precio_producto), emulando exactamente 
+la directriz de precisión y formato establecida en dicho prompt de tu repositorio.
 """
 
 # 1. Definición de Herramientas Personalizadas con manejo de excepciones propio
@@ -85,6 +97,14 @@ ejecutor_agente = AgentExecutor(
     handle_parsing_errors=True         # Maneja errores de formato de forma segura
 )
 
+def extraer_texto_limpio(salida) -> str:
+    """Extrae texto limpio y legible de la salida del agente, manejando listas o strings."""
+    if isinstance(salida, list):
+        if salida and isinstance(salida[0], dict):
+            return salida[0].get("text", str(salida[0]))
+        return str(salida)
+    return str(salida)
+
 if __name__ == "__main__":
     print("=== PRUEBA 1: Consulta de Herramienta de Precios ===")
     resultado_1 = ejecutor_agente.invoke({
@@ -95,12 +115,13 @@ if __name__ == "__main__":
     herramienta_usada_1 = resultado_1["intermediate_steps"][0][0].tool
     assert herramienta_usada_1 == "consultar_precio_producto"
     print("\n[✓] Prueba 1 superada. Herramienta utilizada:", herramienta_usada_1)
-    print("Respuesta final:", resultado_1["output"])
+    print("Respuesta final:", extraer_texto_limpio(resultado_1["output"]))
 
     print("\n=== PRUEBA 2: Pregunta General (Sin Herramienta) ===")
     resultado_2 = ejecutor_agente.invoke({
         "entrada": "¿Cómo puedo contactar a soporte administrativo?"
     })
     assert resultado_2["intermediate_steps"] == []
-    print("[✓] Prueba 2 superada. El agente respondió directamente sin invocar herramientas.")
-    print("Respuesta final:", resultado_2["output"])
+    print("\n[✓] Prueba 2 superada. El agente respondió directamente sin invocar herramientas.")
+    print("Respuesta final:", extraer_texto_limpio(resultado_2["output"]))
+

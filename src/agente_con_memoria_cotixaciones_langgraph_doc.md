@@ -1,4 +1,4 @@
-### 1. Explicación Detallada del Código (`agente_cotizaciones_langgraph.py`)
+### 1. Explicación Detallada del Código (`agente_con_memoria_cotizaciones_langgraph.py`)
 
 Este script adapta el flujo de trabajo de tu profesora —y los conceptos del **Bloque 22** ([Tu herramienta personalizada, ya construida e integrada](https://learning-pro.skillnest.com/mod/page/view.php?id=15706))— a una arquitectura moderna basada en **LangChain v1 + LangGraph**, orientada a tu portal de cotizaciones:
 
@@ -77,3 +77,21 @@ Desde el punto de vista del negocio (para un portal administrativo de cotizacion
 * **El problema de negocio:** Los equipos administrativos pierden tiempo valioso buscando estados de cotizaciones o haciendo cálculos rutinarios, pero tampoco pueden entregar decisiones críticas (como descuentos especiales) a un bot sin control.
 * **Qué resuelve:** Automatiza las consultas rápidas y cálculos operativos, manteniendo al humano al mando de las decisiones sensibles, lo cual mejora la velocidad de respuesta comercial sin sacrificar gobernanza ni control del riesgo.
 
+
+
+--------------------------------------------------------------------------------------------------
+
+Adaptación completa de tu flujo de **cotizaciones** usando el stack moderno de **LangChain v1 + LangGraph**, sin guardarte nada y manteniendo cada pieza equivalente a lo que tenías en el código anterior:
+
+* **Agente moderno con `create_agent**` (`langchain.agents`), reemplazando `create_tool_calling_agent` + `AgentExecutor` de `langchain_classic` (que como indica el material del [Bloque 22](https://learning-pro.skillnest.com/mod/page/view.php?id=15706), se movió al paquete de compatibilidad `langchain-classic`).
+* **Memoria nativa por `thread_id` con `InMemorySaver**` (`langgraph.checkpoint.memory`), en vez de `RunnableWithMessageHistory` + `InMemoryChatMessageHistory` + `session_id` (que emite aviso de deprecación en favor del `checkpointer` de LangGraph).
+* **Supervisión humana (`Human-in-the-Loop`) nativa con `HumanInTheLoopMiddleware` y `Command(resume=...)**`, reemplazando el `input()` dentro de un hilo (`threading.Thread` + `queue.Queue` con `timeout`), porque en LangGraph pausar con interrupciones y reanudar con `Command(resume=...)` sobre el mismo `thread_id` es el patrón pensado para producción y no bloquea hilos de consola.
+* **Trazabilidad en `.jsonl` y extracción limpia de texto** (`trazas_cotizaciones_modernas.jsonl` y auditoría de aprobaciones), preservando el registro de entradas, salidas y eventos.
+
+### Diferencias Clave Frente a la Versión Anterior "agente_con_memoria_profe"
+
+* **Sin `RunnableWithMessageHistory` ni `AgentExecutor`:** Todo el ciclo del agente y su memoria viven en `create_agent(..., checkpointer=InMemorySaver())`, usando `thread_id` dentro de `config["configurable"]` y el estado `{"messages": [...]}`.
+* **HITL sin bloquear hilos con `input()`:** `HumanInTheLoopMiddleware` detiene la ejecución antes de ejecutar `aplicar_descuento_especial` y guarda el checkpoint en `InMemorySaver`; luego `Command(resume={"decisions": [decision]})` retoma el grafo (`approve`, `edit` o `reject`) en el mismo `thread_id`.
+* **Regla práctica al usar `interrupt` / HITL:** El estado intermedio debe ser serializable y la lógica previa a una pausa no debe tener efectos secundarios duplicables al reanudar el nodo. Para producción, basta cambiar `InMemorySaver()` por un checkpointer persistente (como SQLite o Postgres).
+
+¿Quieres que revisemos ahora el [Bloque 23](https://learning-pro.skillnest.com/mod/page/view.php?id=15707) (`Límites de autonomía y supervisión humana del agente`) o probamos el comportamiento con `edit` y `reject` en tu entorno?

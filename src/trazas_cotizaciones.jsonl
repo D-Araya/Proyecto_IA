@@ -1,2 +1,70 @@
 {"timestamp": "2026-11-19T06:20:15.520856+00:00", "session_id": "admin_cotizaciones_01", "mensajes_en_historial": 2, "entrada": "Consulta el estado de la cotización COT-101 incluyendo su detalle.", "acciones": [{"herramienta": "consultar_cotizacion_detallada", "argumentos": {"codigo_cotizacion": "COT-101", "incluir_detalle_items": true}, "observacion": "Pendiente de aprobación comercial (detalle: 3x Servidor Rack Enterprise (SRV-001); Válida hasta 2026-12-15)"}], "respuesta_final": "El estado de la cotización **COT-101** es **Pendiente de aprobación comercial**.\n\n**Detalles de la cotización:**\n* **Ítems:** 3x Servidor Rack Enterprise (`SRV-001`)\n* **Vigencia:** Válida hasta el 15 de diciembre de 2026"}
 {"timestamp": "2026-11-19T06:20:23.879973+00:00", "session_id": "admin_cotizaciones_01", "mensajes_en_historial": 4, "entrada": "¿Y cuál sería el subtotal de 4 unidades a 1200.0 USD?", "acciones": [{"herramienta": "calcular_subtotal_cotizacion", "argumentos": {"precio_unitario": 1200, "unidades": 4}, "observacion": "El subtotal calculado es de $4800.00 USD."}], "respuesta_final": "El subtotal para 4 unidades a un precio unitario de $1,200.00 USD es de **$4,800.00 USD**."}
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""La idea detrás de **`trazas_cotizaciones.jsonl`** es implementar lo que en la industria de la Inteligencia Artificial se conoce como **Observabilidad, Trazabilidad y Auditoría (LLM Tracing)**.
+
+En palabras sencillas: **es la "caja negra" o registro de vuelo de tu agente.**
+
+A diferencia de un programa tradicional donde el flujo de código es fijo, un agente toma decisiones autónomas. Este archivo existe por **5 razones fundamentales**:
+
+---
+
+### 1. Auditoría del razonamiento (Saber *por qué* respondió lo que respondió)
+Si miras una de las líneas guardadas en el archivo:
+```json
+{
+  "entrada": "¿Y cuál sería el subtotal de 4 unidades a 1200.0 USD?",
+  "acciones": [{
+    "herramienta": "calcular_subtotal_cotizacion",
+    "argumentos": {"precio_unitario": 1200, "unidades": 4},
+    "observacion": "El subtotal calculado es de $4800.00 USD."
+  }],
+  "respuesta_final": "El subtotal para 4 unidades a un precio unitario de $1,200.00 USD es de **$4,800.00 USD**."
+}
+```
+Si un cliente o administrador pregunta *«¿De dónde sacó el asistente ese número?»*, con este archivo puedes demostrar:
+1. Qué herramienta decidió usar el agente (`calcular_subtotal_cotizacion`).
+2. Qué números exactos le envió a la herramienta (`1200` y `4`).
+3. Qué resultado exacto devolvió la herramienta antes de que el LLM redactara el texto.
+
+---
+
+### 2. Control del crecimiento del contexto y los costos
+En agentes con memoria, cada mensaje nuevo se acumula. 
+En el archivo ves el campo:
+* Turno 1: `"mensajes_en_historial": 2`
+* Turno 2: `"mensajes_en_historial": 4`
+
+En el Turno 2, el modelo vuelve a leer los mensajes del Turno 1. Esto significa que **cada turno es más caro y consume más tokens que el anterior**. La traza te permite auditar si una conversación se está volviendo demasiado larga o costosa.
+
+---
+
+### 3. Depuración rápida (Debugging)
+Si el agente comete un error, la traza te dice de inmediato **dónde** ocurrió el problema:
+* ¿El error fue del modelo que eligió mal la herramienta?
+* ¿O el modelo eligió bien pero tu función de Python (`@tool`) falló en el cálculo?
+* ¿O la función calculó bien pero el modelo alucino en la respuesta final?
+
+---
+
+### 4. ¿Por qué formato `.jsonl` y no `.json` normal?
+* En un archivo `.json` normal, para agregar una nueva interacción tendrías que leer todo el archivo, cargarlo en memoria, meter el elemento en una lista y reescribir todo el disco.
+* En **`.jsonl` (JSON Lines)**, cada línea es un objeto JSON independiente. El programa simplemente hace un *append* (`open(..., "a")`) al final del archivo en un milisegundo sin consumir memoria. Es el estándar de la industria para logs y trazas (usado por herramientas como LangSmith, Datadog o WandB).
+
+---
+
+### 5. Cumplimiento y seguridad en entornos comerciales
+Al tratarse de un portal administrativo de **cotizaciones y precios**, dejar un registro inmutable con fecha, hora (`timestamp`) e identificador de sesión (`session_id`) es indispensable para cualquier auditoría comercial.
+"""
